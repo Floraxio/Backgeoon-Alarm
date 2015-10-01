@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
+        id="com.oby.cordova.plugin.backgeoonalarm"
+        version="0.1.0">
+
+    <engines>
+        <engine name="cordova" version=">3.0.0" />
+    </engines>
+
+    <name>backgeoonalarm</name>
+    <description>A hello-world plugin</description>
+    <author>LABYT Nicolas</author>
+    <keywords>foo,bar</keywords>
+
+
+
+    <js-module src="www/backgeoonalarm.js" name="backgeoonalarm">
+        <clobbers target="plugin.backgeoonalarm" />
+    </js-module>
+
+    <!-- Android -->
+    <platform name="android">
+        <source-file src="src/android/Backgeoonalarm.java" target-dir="src/com/oby/cordova/plugin" />
+        <source-file src="src/android/AlarmReceiver.java" target-dir="src/com/oby/cordova/plugin" />
+
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="Backgeoonalarm" >
+                <param name="android-package" value="com.oby.cordova.plugin.Backgeoonalarm"/>
+            </feature>
+        </config-file>
+    </platform>
+</plugin>
