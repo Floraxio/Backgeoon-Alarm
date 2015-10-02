@@ -21,6 +21,9 @@ import android.view.View;
 import android.widget.Toast;
 import java.util.Calendar;
 
+import android.content.pm.PackageManager;
+import android.content.ComponentName;
+
 import android.util.Log;
 
 /**
@@ -30,7 +33,12 @@ public class Backgeoonalarm extends CordovaPlugin
 {
     private PendingIntent pendingIntent;
     private static final String TAG = "Backgeoonalarm";
-    
+    private static final int REPEAT_TIME = 10; // evry 30 sec
+
+    private String convertIntToString(int i){
+        return Integer.toString(i);
+    }
+
     @Override
     public boolean execute(String action, final String rawArgs, final CallbackContext callbackContext) throws JSONException {
         // helloworld return OK
@@ -49,14 +57,13 @@ public class Backgeoonalarm extends CordovaPlugin
             threadhelper( new FileOp( ){
                 public void run(JSONArray args) throws JSONException, MalformedURLException  {
                     // launch service
+                    Log.v(TAG, "initbackgroundgeo entry");
+                    Log.v(TAG, args.toString());
 
-                    Log.v(TAG, args.parse.toString());
-
+                    // hook on tick alarm system
+                    initbackgroundgeo();
                     // callback
                     callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, "initialisation in java sucess"));
-                    
-
-                    //readFileAs(fname, start, end, callbackContext, null, -1);
                 }
             }, rawArgs, callbackContext);
 
@@ -71,10 +78,8 @@ public class Backgeoonalarm extends CordovaPlugin
             //callbackContext.success();
             //return error callback
             // callbackContext.error("Call configure before calling start");
-
             return true;
         }
-
         return false;
     }
 
@@ -85,23 +90,40 @@ public class Backgeoonalarm extends CordovaPlugin
             callbackContext.error("Expected one non-empty string argument.");
         }
     }
+    /* wra  pper foir start the alarm tick */
     public void initbackgroundgeo(){
-        Context context = this.cordova.getActivity().getApplicationContext();
-
-        // init the alarm clock service
-        Intent alarmIntent = new Intent(context, AlarmReceiver.class);
-        pendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
+        Log.v(TAG, "initbackgroundgeo function");
+        start();
     }
-
 
     /* ALARM CLOCK FUNTIONS */
     public void start() {
         Context context = this.cordova.getActivity().getApplicationContext();
 
+        Intent alarmIntent = new Intent(context, AlarmReceiver.class);
+
+
+        /* Retrieve a PendingIntent that will perform a broadcast */
+        boolean alarmUp = (PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_NO_CREATE) != null);
+
+        // if alarm ever defined (oncetime is defined, the app must be uninstall for disabled alarm)
+        if (alarmUp){
+            Log.v(TAG, "Alarm is ever up.. return true.");
+            return;
+        }
+
+
+
+        pendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
+
         AlarmManager manager = (AlarmManager) cordova.getActivity().getSystemService(Context.ALARM_SERVICE);
-        int interval = 8000;
+        int interval = REPEAT_TIME*1000;
+        
+            Log.v(TAG, "Interval for tick is : "+convertIntToString(interval));
 
         manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
+        
+
         Toast.makeText(context, "Alarm Set", Toast.LENGTH_SHORT).show();
     }
 

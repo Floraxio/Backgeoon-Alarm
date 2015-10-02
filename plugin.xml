@@ -21,13 +21,49 @@
 
     <!-- Android -->
     <platform name="android">
-        <source-file src="src/android/Backgeoonalarm.java" target-dir="src/com/oby/cordova/plugin" />
-        <source-file src="src/android/AlarmReceiver.java" target-dir="src/com/oby/cordova/plugin" />
+
+        <dependency id="cordova-plugin-android-support-v4" />
 
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="Backgeoonalarm" >
                 <param name="android-package" value="com.oby.cordova.plugin.Backgeoonalarm"/>
             </feature>
         </config-file>
+
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <!-- receiver for AlarmManager -->
+            <receiver android:name="com.oby.cordova.plugin.AlarmReceiver" android:exported="false" />
+
+            <!-- receiver for boot android device -->
+            <receiver android:name="com.oby.cordova.plugin.RestoreReceiver" android:exported="false" >
+                <intent-filter>
+                    <action android:name="android.intent.action.BOOT_COMPLETED" />
+                </intent-filter>
+            </receiver>
+
+
+            <!--<activity
+                android:name="com.oby.cordova.plugin.Backgeoonalarm"
+                android:launchMode="singleInstance"
+                android:theme="@android:style/Theme.NoDisplay"
+                android:exported="false" />-->
+
+        </config-file>
+
+
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+            <!--<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
+        </config-file>
+
+        <source-file src="src/android/Backgeoonalarm.java" target-dir="src/com/oby/cordova/plugin" />
+        <source-file src="src/android/AlarmReceiver.java" target-dir="src/com/oby/cordova/plugin" />
+        <source-file src="src/android/RestoreReceiver.java" target-dir="src/com/oby/cordova/plugin" />
+        <source-file src="src/android/Backservice.java" target-dir="src/com/oby/cordova/plugin" />
+
+
+
+
     </platform>
 </plugin>
