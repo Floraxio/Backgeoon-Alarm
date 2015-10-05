@@ -12,6 +12,7 @@ import java.lang.Thread;
 
 import android.widget.Toast;
 import android.util.Log;
+import android.os.SystemClock;
 
 public class Backservice extends Service {
     private static final String TAG = "Backservice";
@@ -23,8 +24,6 @@ public class Backservice extends Service {
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION = 666;
-
-
 
     public Backservice() {
     }
@@ -63,7 +62,7 @@ public class Backservice extends Service {
     public void onDestroy() {
         this.isRunning = false;
         // Cancel the persistent notification.
-        mNM.cancel("Service stopped");
+        mNM.cancel(NOTIFICATION);
         Toast.makeText(this, "Service Destroyed", Toast.LENGTH_LONG).show();
 
     }
@@ -102,11 +101,8 @@ public class Backservice extends Service {
     public int handleStart(Intent intent, int startId){
         Log.v(TAG, "handleStart Service.");
 
-        Toast.makeText(this, " handleStart", Toast.LENGTH_LONG).show();
-
-
         if(!this.isRunning) {
-            Log.v(TAG, "diff - isRunning.");
+            Log.v(TAG, "different de - isRunning - relaunch action.");
 
             this.isRunning = true;
             //start the process
@@ -115,6 +111,7 @@ public class Backservice extends Service {
             Log.v(TAG, "ever - isRunning.");
         }
 
+        Toast.makeText(this, " handleStart", Toast.LENGTH_SHORT).show();
 
         return START_STICKY;
     }
@@ -122,10 +119,19 @@ public class Backservice extends Service {
     private Runnable myTask = new Runnable() {
         public void run() {
             // Do something here
-
-
             Log.v(TAG, "Runnable run thread.");
 
+            
+
+
+
+            // my interface :-) 
+            SystemClock.sleep(10000); // sleep 10 sec
+
+
+
+
+            // internal stopping the thread.
             stopSelf();
         }
     };
