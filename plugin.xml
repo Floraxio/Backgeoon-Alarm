@@ -42,21 +42,24 @@
                 </intent-filter>
             </receiver>
 
-
-            <!--<activity
-                android:name="com.oby.cordova.plugin.Backgeoonalarm"
-                android:launchMode="singleInstance"
-                android:theme="@android:style/Theme.NoDisplay"
-                android:exported="false" />-->
-
+            <service android:name="com.oby.cordova.plugin.Backservice" android:enabled="true" android:exported="true"></service>
         </config-file>
 
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
             <!--<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
+            <!-- permissions for the service -->
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />    
+            <uses-permission android:name="android.permission.ACCESS_GPS" />  
+            <uses-permission android:name="android.permission.ACCESS_ASSISTED_GPS" /> 
+            <uses-permission android:name="android.permission.LOCATION" />
         </config-file>
 
+        <!-- copy png notif img to directory -->
+        <source-file src="src/android/notification.png" target-dir="res/drawable" />
+        <!-- copy java files in directory -->
         <source-file src="src/android/Backgeoonalarm.java" target-dir="src/com/oby/cordova/plugin" />
         <source-file src="src/android/AlarmReceiver.java" target-dir="src/com/oby/cordova/plugin" />
         <source-file src="src/android/RestoreReceiver.java" target-dir="src/com/oby/cordova/plugin" />

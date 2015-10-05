@@ -4,10 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import java.util.Calendar;
-
+import android.widget.Toast;
 import android.util.Log;
 
 
@@ -18,8 +15,13 @@ public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 		Log.v(TAG, "AlarmReceiver tick.");
-		// run the service
-		Backservice backservice = new Backservice();
-		backservice.launchService();
+	    // start service in receiver
+        context.startService(new Intent(context, Backservice.class));
+        
+        // stopService(new Intent(this, MyService.class));
+
+ 		// make a informative toast system
+		// Toast.makeText(context, "On receive AlarmReceiver", Toast.LENGTH_SHORT).show();
+
     }
 }

@@ -1,4 +1,3 @@
-// package org.apache.cordova.plugin;
 package com.oby.cordova.plugin;
 
 /* class cordova dependency */
