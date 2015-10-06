@@ -1,39 +1,207 @@
 package com.oby.cordova.plugin;
 
-import android.app.Service;
-import android.content.Intent;
-import android.app.PendingIntent;
-import android.os.IBinder;
 
+import android.app.AlertDialog;
+import android.app.Service;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.provider.Settings;
+
+import android.app.PendingIntent;
 import android.app.NotificationManager;
 import android.app.Notification;
-
-import java.lang.Thread;
-
 import android.widget.Toast;
-import android.util.Log;
 import android.os.SystemClock;
 
-public class Backservice extends Service {
+import android.util.Log;
+ 
+public class Backservice extends Service implements LocationListener {
     private static final String TAG = "Backservice";
-    /* ever running ? */
-    private boolean isRunning;
-    private NotificationManager mNM;
-    private Thread backgroundThread;
+    protected boolean isRunning;
+    protected Thread backgroundThread;
 
-    // Unique Identification Number for the Notification.
-    // We use it on Notification start, and to cancel it.
-    private int NOTIFICATION = 666;
+    protected int NOTIFICATION = 666;
+    protected NotificationManager mNM;
 
-    public Backservice() {
+    //private final Context mContext;
+ 
+    // flag for GPS status
+    boolean isGPSEnabled = false;
+ 
+    // flag for network status
+    boolean isNetworkEnabled = false;
+ 
+    // flag for GPS status
+    boolean canGetLocation = false;
+ 
+    Location location; // location
+    double latitude; // latitude
+    double longitude; // longitude
+ 
+    // The minimum distance to change Updates in meters
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
+ 
+    // The minimum time between updates in milliseconds
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+ 
+    // Declaring a Location Manager
+    protected LocationManager locationManager;
+ 
+    /*public Backservice(Context context) {
+        Log.v(TAG, "Backservice constructor");
+        this.mContext = context;
+    }*/
+ 
+    public Location getLocation() {
+        try {
+            //locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
+            locationManager = (LocationManager) this.getApplicationContext().getSystemService(LOCATION_SERVICE);
+            // getting GPS status
+            isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            // getting network status
+            isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            if (!isGPSEnabled && !isNetworkEnabled) {
+                // no network provider is enabled
+            } else {
+                this.canGetLocation = true;
+                // First get location from Network Provider
+                if (isNetworkEnabled) {
+                    locationManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER,
+                            MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                    Log.d(TAG, "Network");
+                    if (locationManager != null) {
+                        location = locationManager
+                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        if (location != null) {
+                            latitude = location.getLatitude();
+                            longitude = location.getLongitude();
+                        }
+                    }
+                }
+                // if GPS Enabled get lat/long using GPS Services
+                if (isGPSEnabled) {
+                    if (location == null) {
+                        locationManager.requestLocationUpdates(
+                                LocationManager.GPS_PROVIDER,
+                                MIN_TIME_BW_UPDATES,
+                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                        Log.d(TAG, "GPS Enabled");
+                        if (locationManager != null) {
+                            location = locationManager
+                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                            if (location != null) {
+                                latitude = location.getLatitude();
+                                longitude = location.getLongitude();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.v(TAG, location.toString());
+        return location;
     }
-
+     
+    /**
+     * Stop using GPS listener
+     * Calling this function will stop using GPS in your app
+     * */
+    public void stopUsingGPS(){
+        if(locationManager != null){
+            locationManager.removeUpdates(Backservice.this);
+        }       
+    }
+    /**
+     * Function to get latitude
+     * */
+    public double getLatitude(){
+        if(location != null){
+            latitude = location.getLatitude();
+        }
+        return latitude;
+    }
+    /**
+     * Function to get longitude
+     * */
+    public double getLongitude(){
+        if(location != null){
+            longitude = location.getLongitude();
+        }
+        return longitude;
+    }
+    /**
+     * Function to check GPS/wifi enabled
+     * @return boolean
+     * */
+    public boolean canGetLocation() {
+        return this.canGetLocation;
+    }
+    /**
+     * Function to show settings alert dialog
+     * On pressing Settings button will lauch Settings Options
+     * */
+    /*public void showSettingsAlert(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+      
+        // Setting Dialog Title
+        alertDialog.setTitle("GPS is settings");
+  
+        // Setting Dialog Message
+        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+  
+        // On pressing Settings button
+        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog,int which) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                mContext.startActivity(intent);
+            }
+        });
+  
+        // on pressing cancel button
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+            dialog.cancel();
+            }
+        });
+  
+        // Showing Alert Message
+        alertDialog.show();
+    }*/
     @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+    public void onLocationChanged(Location location) {
     }
+    @Override
+    public void onProviderDisabled(String provider) {
+    }
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+    @Override
+    public IBinder onBind(Intent arg0) {
+        return null;
+    }
+    @Override
+    public void onDestroy() {
+        this.isRunning = false;
+        // Cancel the persistent notification.
+        mNM.cancel(NOTIFICATION);
+        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_LONG).show();
 
+    }
     @Override
     public void onCreate() {
         this.isRunning = false;
@@ -43,8 +211,33 @@ public class Backservice extends Service {
         // Display a notification about us starting.  We put an icon in the status bar.
         showNotification();
 
+        getLocation();
+
         Toast.makeText(this, "The new Service was Created", Toast.LENGTH_LONG).show();
 
+    }
+    /**
+     * Show a notification while this service is running.
+     */
+    private void showNotification() {
+        // In this sample, we'll use the same text for the ticker and the expanded notification
+        CharSequence text = "Back Service is Start";
+        // The PendingIntent to launch our activity if the user selects this notification
+        // Build a Notification required for running service in foreground.
+        Intent main = new Intent(this, Backgeoonalarm.class);
+        main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, main,  PendingIntent.FLAG_UPDATE_CURRENT);
+        // Set the info for the views that show in the notification panel.
+        Notification notification = new Notification.Builder(this)
+                .setSmallIcon(android.R.drawable.ic_menu_mylocation)  // the status icon
+                .setTicker(text)  // the status text
+                .setWhen(System.currentTimeMillis())  // the time stamp
+                .setContentTitle("Geocode en cours..")  // the label of the entry
+                .setContentText(text)  // the contents of the entry
+                .setContentIntent(pendingIntent)  // The intent to send when the entry is clicked
+                .build();
+        // Send the notification to system.
+        mNM.notify(NOTIFICATION, notification);
     }
     /* old && deprecated api */
     @Override
@@ -58,45 +251,6 @@ public class Backservice extends Service {
         handleStart(intent, startId);
         return START_NOT_STICKY;
     }
-    @Override
-    public void onDestroy() {
-        this.isRunning = false;
-        // Cancel the persistent notification.
-        mNM.cancel(NOTIFICATION);
-        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_LONG).show();
-
-    }
-
-
-    /**
-     * Show a notification while this service is running.
-     */
-    private void showNotification() {
-        // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = "Back Service is Start";
-
-        // The PendingIntent to launch our activity if the user selects this notification
-            // Build a Notification required for running service in foreground.
-        Intent main = new Intent(this, Backgeoonalarm.class);
-        main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, main,  PendingIntent.FLAG_UPDATE_CURRENT);
-
-        //PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, AlarmReceiver.class), 0);
-
-        // Set the info for the views that show in the notification panel.
-        Notification notification = new Notification.Builder(this)
-                .setSmallIcon(android.R.drawable.ic_menu_mylocation)  // the status icon
-                .setTicker(text)  // the status text
-                .setWhen(System.currentTimeMillis())  // the time stamp
-                .setContentTitle("Geocode en cours..")  // the label of the entry
-                .setContentText(text)  // the contents of the entry
-                .setContentIntent(pendingIntent)  // The intent to send when the entry is clicked
-                .build();
-
-        // Send the notification.
-        mNM.notify(NOTIFICATION, notification);
-    }
-
     /* Master entry of the service */
     public int handleStart(Intent intent, int startId){
         Log.v(TAG, "handleStart Service.");
@@ -121,11 +275,12 @@ public class Backservice extends Service {
             // Do something here
             Log.v(TAG, "Runnable run thread.");
 
-            
-
-
+            // get the background localisation
+            Log.v(TAG, location.toString());
 
             // my interface :-) 
+            
+            // fuck system and preset a delay for testing.
             SystemClock.sleep(10000); // sleep 10 sec
 
 
