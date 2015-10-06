@@ -19,6 +19,9 @@ import android.app.Notification;
 import android.widget.Toast;
 import android.os.SystemClock;
 
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import android.util.Log;
  
 public class Backservice extends Service implements LocationListener {
@@ -28,7 +31,7 @@ public class Backservice extends Service implements LocationListener {
 
     protected int NOTIFICATION = 666;
     protected NotificationManager mNM;
-
+    protected Context mContext;
     //private final Context mContext;
  
     // flag for GPS status
@@ -72,14 +75,10 @@ public class Backservice extends Service implements LocationListener {
                 this.canGetLocation = true;
                 // First get location from Network Provider
                 if (isNetworkEnabled) {
-                    locationManager.requestLocationUpdates(
-                            LocationManager.NETWORK_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                     Log.d(TAG, "Network");
                     if (locationManager != null) {
-                        location = locationManager
-                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                         if (location != null) {
                             latitude = location.getLatitude();
                             longitude = location.getLongitude();
@@ -89,14 +88,10 @@ public class Backservice extends Service implements LocationListener {
                 // if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
                     if (location == null) {
-                        locationManager.requestLocationUpdates(
-                                LocationManager.GPS_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                         Log.d(TAG, "GPS Enabled");
                         if (locationManager != null) {
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                             if (location != null) {
                                 latitude = location.getLatitude();
                                 longitude = location.getLongitude();
@@ -120,7 +115,7 @@ public class Backservice extends Service implements LocationListener {
     public void stopUsingGPS(){
         if(locationManager != null){
             locationManager.removeUpdates(Backservice.this);
-        }       
+        }
     }
     /**
      * Function to get latitude
@@ -147,37 +142,8 @@ public class Backservice extends Service implements LocationListener {
     public boolean canGetLocation() {
         return this.canGetLocation;
     }
-    /**
-     * Function to show settings alert dialog
-     * On pressing Settings button will lauch Settings Options
-     * */
-    /*public void showSettingsAlert(){
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-      
-        // Setting Dialog Title
-        alertDialog.setTitle("GPS is settings");
-  
-        // Setting Dialog Message
-        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
-  
-        // On pressing Settings button
-        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                mContext.startActivity(intent);
-            }
-        });
-  
-        // on pressing cancel button
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-            dialog.cancel();
-            }
-        });
-  
-        // Showing Alert Message
-        alertDialog.show();
-    }*/
+
+
     @Override
     public void onLocationChanged(Location location) {
     }
@@ -206,11 +172,12 @@ public class Backservice extends Service implements LocationListener {
     public void onCreate() {
         this.isRunning = false;
         this.backgroundThread = new Thread(myTask);
+        this.mContext = this;
 
         mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         // Display a notification about us starting.  We put an icon in the status bar.
         showNotification();
-
+        // get location on create for have the context inside (and send http request in the thread)
         getLocation();
 
         Toast.makeText(this, "The new Service was Created", Toast.LENGTH_LONG).show();
@@ -221,7 +188,7 @@ public class Backservice extends Service implements LocationListener {
      */
     private void showNotification() {
         // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = "Back Service is Start";
+        CharSequence text = "MyEvent - Backservice";
         // The PendingIntent to launch our activity if the user selects this notification
         // Build a Notification required for running service in foreground.
         Intent main = new Intent(this, Backgeoonalarm.class);
@@ -232,7 +199,7 @@ public class Backservice extends Service implements LocationListener {
                 .setSmallIcon(android.R.drawable.ic_menu_mylocation)  // the status icon
                 .setTicker(text)  // the status text
                 .setWhen(System.currentTimeMillis())  // the time stamp
-                .setContentTitle("Geocode en cours..")  // the label of the entry
+                .setContentTitle("Geocode..")  // the label of the entry
                 .setContentText(text)  // the contents of the entry
                 .setContentIntent(pendingIntent)  // The intent to send when the entry is clicked
                 .build();
@@ -278,16 +245,48 @@ public class Backservice extends Service implements LocationListener {
             // get the background localisation
             Log.v(TAG, location.toString());
 
+            // add it to the local litesql database
+            Sqlitelocation sqlitelocation = new Sqlitelocation(mContext);
+            sqlitelocation.addLocation(location);
+            
+            // send to the server the full object
+            // si android is online send it to server
+            if (isNetworkOnline()){
+                Log.v(TAG, "device is online !!! ");
+                
+
+            } else {
+                Log.v(TAG, "device NOT online !!! ");
+
+            }
+            // send an http request to a server
+
             // my interface :-) 
             
             // fuck system and preset a delay for testing.
             SystemClock.sleep(10000); // sleep 10 sec
 
 
-
-
             // internal stopping the thread.
             stopSelf();
         }
     };
+    public boolean isNetworkOnline() {
+        boolean status=false;
+        try{
+            ConnectivityManager cm = (ConnectivityManager) this.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo netInfo = cm.getNetworkInfo(0);
+            if (netInfo != null && netInfo.getState()==NetworkInfo.State.CONNECTED) {
+                status= true;
+            }else {
+                netInfo = cm.getNetworkInfo(1);
+                if(netInfo!=null && netInfo.getState()==NetworkInfo.State.CONNECTED)
+                    status= true;
+            }
+        }catch(Exception e){
+            e.printStackTrace();  
+            return false;
+        }
+        return status;
+    }
 }

@@ -3,13 +3,11 @@ package com.oby.cordova.plugin;
 /* class cordova dependency */
 import org.apache.cordova.PluginResult;
 
-
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import java.net.MalformedURLException;
-
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

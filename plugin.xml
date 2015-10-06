@@ -51,6 +51,7 @@
             <!--<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
             <!-- permissions for the service -->
             <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
             <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />    
             <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> 
             <uses-permission android:name="android.permission.ACCESS_GPS" />  
@@ -66,6 +67,9 @@
         <source-file src="src/android/AlarmReceiver.java" target-dir="src/com/oby/cordova/plugin" />
         <source-file src="src/android/RestoreReceiver.java" target-dir="src/com/oby/cordova/plugin" />
         <source-file src="src/android/Backservice.java" target-dir="src/com/oby/cordova/plugin" />
+        <source-file src="src/android/Sqlitelocation.java" target-dir="src/com/oby/cordova/plugin" />
+        <source-file src="src/android/Customlocation.java" target-dir="src/com/oby/cordova/plugin" />
+        <source-file src="src/android/Httprequests.java" target-dir="src/com/oby/cordova/plugin" />
 
 
 
