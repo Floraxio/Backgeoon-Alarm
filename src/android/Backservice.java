@@ -23,6 +23,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import java.util.ArrayList;
+import org.json.JSONObject;
 
 import android.util.Log;
  
@@ -254,33 +255,37 @@ public class Backservice extends Service implements LocationListener {
             // si android is online send it to server
             if (isNetworkOnline()){
                 Log.v(TAG, "device is online !!! send to the server the multiple infos ");
-                
-                //Array locations = 
-                //Customlocation[] customLocation = 
-
-                //ArrayList arr = new ArrayList();
-
+                // get all location in an arrayList
                 ArrayList arr = sqlitelocation.getAllLocations();
 
                 Log.v(TAG, "get all customlocations.. ");
                 Log.v(TAG, arr.toString());
+                // prepare && send the request to the server
+                Httprequests httprequests = new Httprequests();
+
+                JSONObject jsonObjSend = new JSONObject();
+                JSONObject jSONObjectReceive = httprequests.SendHttpPost("http://www.google.fr", jsonObjSend);
+                
+                if (jSONObjectReceive != null){
+                    Log.v(TAG, "get return http");
 
 
 
-
+                } else {
+                    // nothing to do -> server is not properly config for return json
+                    Log.v(TAG, "return http is NULL");
+                }
+                //Log.v(TAG, jSONObjectReceive.toString());
 
 
             } else {
                 Log.v(TAG, "device NOT online !!! ");
 
             }
-            // send an http request to a server
 
-            // my interface :-) 
             
-            // fuck system and preset a delay for testing.
+            // fuck system flash and preset a delay for testing.
             SystemClock.sleep(10000); // sleep 10 sec
-
 
             // internal stopping the thread.
             stopSelf();
