@@ -157,8 +157,9 @@ public class Sqlitelocation extends SQLiteOpenHelper {
     }
 
     /* Get All location in array list */
-    public ArrayList<Customlocation> getAllLocations(){
-        ArrayList<Customlocation> all = new ArrayList<Customlocation>();
+    public List getAllLocations(){
+        List<Customlocation> all = new ArrayList<Customlocation>();
+        //Customlocation[] all = new Customlocation();
         String query = "SELECT * from "+DICTIONARY_TABLE_NAME+" order by "+KEY_ID+" DESC ";
         SQLiteDatabase db = this.getReadableDatabase(); // get for read
         Cursor c = db.rawQuery(query, null);

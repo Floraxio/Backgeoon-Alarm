@@ -27,6 +27,8 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import java.util.Map;
 
+import java.util.List;
+
 import android.util.Log;
  
 public class Backservice extends Service implements LocationListener {
@@ -258,7 +260,7 @@ public class Backservice extends Service implements LocationListener {
             if (isNetworkOnline()){
                 Log.v(TAG, "device is online !!! send to the server the multiple infos ");
                 // get all location in an arrayList
-                ArrayList allLocations = sqlitelocation.getAllLocations();
+                List allLocations = sqlitelocation.getAllLocations();
                     Log.v(TAG, "get all customlocations.. ");
                     Log.v(TAG, allLocations.toString());
                 // prepare && send the request to the server
@@ -266,9 +268,24 @@ public class Backservice extends Service implements LocationListener {
                 // ArrayList<String> listdata = new ArrayList<String>();
                 JSONArray jsonArray = new JSONArray();
                 for(Object customlocation : allLocations){
-                    //JSONObject obj = new JSONObject();
-                    //obj.put()
-                    jsonArray.put(customlocation);
+                    Log.v(TAG, "inforeach arraylist");
+                    Log.v(TAG, "customlocation: "+customlocation.toString());
+                    Customlocation custom = (Customlocation)customlocation;
+Log.v(TAG, "custommmm: "+custom.toString());
+
+                    //format an jsonocject for have datas
+                    JSONObject jsonObj = new JSONObject();
+                    try {
+                        jsonObj.put("datetime_on_device", sqlitelocation.dateToString(custom.getRecordedAt()));
+                        jsonObj.put("lat", custom.getLatitude());
+                        jsonObj.put("lng", custom.getLongitude());
+                    } catch (Exception e)
+                    {
+                        // More about HTTP exception handling in another tutorial.
+                        // For now we just print the stack trace.
+                        e.printStackTrace();
+                    }
+                    jsonArray.put(jsonObj);
                 }
                     Log.v(TAG, "transform to jsonarray ");
                     Log.v(TAG, jsonArray.toString());

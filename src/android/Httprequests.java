@@ -66,7 +66,8 @@ public class Httprequests {
 				String resultString= convertStreamToString(instream);
 				instream.close();
 				resultString = resultString.substring(1,resultString.length()-1); // remove wrapping "[" and "]"
-			Log.i(TAG, "HTTPResponse resultString is "+resultString);
+				
+				Log.i(TAG, "HTTPResponse resultString is "+resultString);
 
 				// Transform the String into a JSONObject
 				JSONObject jsonObjRecv = new JSONObject(resultString);
