@@ -24,6 +24,8 @@ import android.net.NetworkInfo;
 
 import java.util.ArrayList;
 import org.json.JSONObject;
+import org.json.JSONArray;
+import java.util.Map;
 
 import android.util.Log;
  
@@ -256,36 +258,51 @@ public class Backservice extends Service implements LocationListener {
             if (isNetworkOnline()){
                 Log.v(TAG, "device is online !!! send to the server the multiple infos ");
                 // get all location in an arrayList
-                ArrayList arr = sqlitelocation.getAllLocations();
-
-                Log.v(TAG, "get all customlocations.. ");
-                Log.v(TAG, arr.toString());
+                ArrayList allLocations = sqlitelocation.getAllLocations();
+                    Log.v(TAG, "get all customlocations.. ");
+                    Log.v(TAG, allLocations.toString());
                 // prepare && send the request to the server
                 Httprequests httprequests = new Httprequests();
-
-                JSONObject jsonObjSend = new JSONObject();
-                JSONObject jSONObjectReceive = httprequests.SendHttpPost("http://www.google.fr", jsonObjSend);
+                // ArrayList<String> listdata = new ArrayList<String>();
+                JSONArray jsonArray = new JSONArray();
+                for(Object customlocation : allLocations){
+                    //JSONObject obj = new JSONObject();
+                    //obj.put()
+                    jsonArray.put(customlocation);
+                }
+                    Log.v(TAG, "transform to jsonarray ");
+                    Log.v(TAG, jsonArray.toString());
                 
+                // create the jsonObject from map
+                JSONObject jsonObjSend = new JSONObject();
+                try {
+                    jsonObjSend.put("data", jsonArray);
+                    jsonObjSend.put("token", "xxxxxxxxxxxxxxxxxxxxxxxxx");
+                    jsonObjSend.put("id", "yyyyyyyyyyyy");
+
+                } catch (Exception e)
+                {
+                    // More about HTTP exception handling in another tutorial.
+                    // For now we just print the stack trace.
+                    e.printStackTrace();
+                }
+                // prepare with variale values
+                String urlTo = "http://192.168.1.28/pp_simple_rest_full/v1/backgroundgeolocation";
+                JSONObject jSONObjectReceive = httprequests.SendHttpPost(urlTo, jsonObjSend);
                 if (jSONObjectReceive != null){
                     Log.v(TAG, "get return http");
-
-
-
+                    Log.v(TAG, jSONObjectReceive.toString());
                 } else {
                     // nothing to do -> server is not properly config for return json
                     Log.v(TAG, "return http is NULL");
                 }
-                //Log.v(TAG, jSONObjectReceive.toString());
-
-
             } else {
                 Log.v(TAG, "device NOT online !!! ");
 
             }
-
             
-            // fuck system flash and preset a delay for testing.
-            SystemClock.sleep(10000); // sleep 10 sec
+            // create a delay for observe the background precesses if too quick
+            // SystemClock.sleep(10000); // sleep 10 sec
 
             // internal stopping the thread.
             stopSelf();

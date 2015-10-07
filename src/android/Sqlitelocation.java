@@ -138,6 +138,7 @@ public class Sqlitelocation extends SQLiteOpenHelper {
 
         Log.v(TAG, "addLocation end function");
     }
+    /* hydratation of the cursor to return an object */
     private Customlocation hydrate(Cursor c) {
         Customlocation customlocation = new Customlocation();
         customlocation.setId(Long.valueOf(Integer.parseInt(c.getString(0))));
@@ -153,29 +154,14 @@ public class Sqlitelocation extends SQLiteOpenHelper {
         Log.v (TAG, "End hydrate : "+customlocation.toString());
 
         return customlocation;
-
-        /*Customlocation l = new Customlocation();
-        l.setId(c.getLong(c.getColumnIndex("id")));
-        l.setRecordedAt(stringToDate(c.getString(c.getColumnIndex("recordedAt"))));
-        l.setLatitude(c.getString(c.getColumnIndex("latitude")));
-        l.setLongitude(c.getString(c.getColumnIndex("longitude")));
-        //l.setAccuracy(c.getString(c.getColumnIndex("accuracy")));
-        //l.setSpeed(c.getString(c.getColumnIndex("speed")));
-        
-        return l;*/
     }
+
     /* Get All location in array list */
     public ArrayList<Customlocation> getAllLocations(){
-        // Customlocation[] getAllLocations() {
         ArrayList<Customlocation> all = new ArrayList<Customlocation>();
-
         String query = "SELECT * from "+DICTIONARY_TABLE_NAME+" order by "+KEY_ID+" DESC ";
         SQLiteDatabase db = this.getReadableDatabase(); // get for read
         Cursor c = db.rawQuery(query, null);
-        // create the return object
-        //int nblines = c.getCount();
-        //Customlocation[] all = new Customlocation();
-        
         if (c .moveToFirst()) {
             while (c.isAfterLast() == false) {
                 all.add(hydrate(c));
@@ -187,8 +173,6 @@ public class Sqlitelocation extends SQLiteOpenHelper {
         return all;
     }
 
-
-
     public Date stringToDate(String dateTime) {
         SimpleDateFormat iso8601Format = new SimpleDateFormat(DATE_FORMAT);
         Date date = null;
@@ -198,7 +182,6 @@ public class Sqlitelocation extends SQLiteOpenHelper {
         } catch (ParseException e) {
             Log.e("DBUtil", "Parsing ISO8601 datetime ("+ dateTime +") failed", e);
         }
-        
         return date;
     }
     public String dateToString(Date date) {

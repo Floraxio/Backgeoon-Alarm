@@ -1,8 +1,14 @@
 package com.oby.cordova.plugin;
 
 import java.util.Date;
+import android.util.Log;
+import org.json.JSONException;
+import java.util.Iterator;
+import org.json.JSONObject;
 
 public class Customlocation {
+    private static final String TAG = "Customlocation";
+
 	private String latitude;
 	private String longitude;
 	private Date recordedAt;
@@ -47,7 +53,6 @@ public class Customlocation {
 	public void setSpeed(String speed) {
 		this.speed = speed;
 	}
-	
 	public static Customlocation fromAndroidLocation(android.location.Location originalLocation) {
 		Customlocation location = new Customlocation();
 		location.setRecordedAt(new Date(originalLocation.getTime()));
