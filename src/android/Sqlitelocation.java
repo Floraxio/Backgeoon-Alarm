@@ -59,7 +59,10 @@ public class Sqlitelocation extends SQLiteOpenHelper {
         if (c != null && c.moveToFirst()) {
             
             //construct the customlocation to return
-            customlocation.setId(Long.valueOf(Integer.parseInt(c.getString(0))));
+
+            customlocation = hydrate(c);
+
+            /*customlocation.setId(Long.valueOf(Integer.parseInt(c.getString(0))));
             customlocation.setLatitude(c.getString(1));
             customlocation.setLongitude(c.getString(2));
             // format the timestamp to date
@@ -67,8 +70,11 @@ public class Sqlitelocation extends SQLiteOpenHelper {
             Date date = new Date(Long.parseLong(c.getString(3))); // parse to long the string date
             Log.v (TAG, "date transformed is : "+date.toString());
             // set the date
-            customlocation.setRecordedAt(date);
+            customlocation.setRecordedAt(date);*/
             
+
+
+
             Log.v (TAG, "get from sql the last location");
             Log.v (TAG, customlocation.toString());
 
@@ -94,15 +100,15 @@ public class Sqlitelocation extends SQLiteOpenHelper {
         // check if location is null for first time or has changed
         boolean equalLng;
         boolean equalLat;
-        String lng = lastLocation.getLongitude();
-        String lat = lastLocation.getLatitude();
-        if (lng == null || lng.equals("null")){ // first time
+        String lastLng = lastLocation.getLongitude();
+        String lastLat = lastLocation.getLatitude();
+        if (lastLng == null || lastLng.equals("null")){ // first time
             equalLng = false;
         } else {
             // location changed ?
             equalLng = new String(lastLocation.getLongitude().substring(0,6)).equals(Double.toString(location.getLongitude()).substring(0,6)); // --> true 
         }
-        if (lat == null || lat.equals("null")){ // first time
+        if (lastLat == null || lastLat.equals("null")){ // first time
             equalLat = false;
         } else {
             // location changed ?
@@ -111,7 +117,10 @@ public class Sqlitelocation extends SQLiteOpenHelper {
 
         // compare on 6 digit including the dot
         if (equalLng && equalLat){
-            Log.v(TAG, "Location not changed - do nothing..");
+            //The third decimal place is worth up to 110 m: it can identify a large agricultural field or institutional campus.
+            //-> The fourth decimal place is worth up to 11 m: it can identify a parcel of land. It is comparable to the typical accuracy of an uncorrected GPS unit with no interference.
+            //The fifth decimal place is worth up to 1.1 m: it distinguish trees from each other. Accuracy to this level with commercial GPS units can only be achieved with differential correction.
+            Log.v(TAG, "Location not changed on 6 digits - do nothing..");
             return;
         }
 
@@ -129,6 +138,57 @@ public class Sqlitelocation extends SQLiteOpenHelper {
 
         Log.v(TAG, "addLocation end function");
     }
+    private Customlocation hydrate(Cursor c) {
+        Customlocation customlocation = new Customlocation();
+        customlocation.setId(Long.valueOf(Integer.parseInt(c.getString(0))));
+        customlocation.setLatitude(c.getString(1));
+        customlocation.setLongitude(c.getString(2));
+        // format the timestamp to date
+        Log.v (TAG, "date ONE is : "+c.getString(3));
+        Date date = new Date(Long.parseLong(c.getString(3))); // parse to long the string date
+        Log.v (TAG, "date transformed is : "+date.toString());
+        // set the date
+        customlocation.setRecordedAt(date);
+        
+        Log.v (TAG, "End hydrate : "+customlocation.toString());
+
+        return customlocation;
+
+        /*Customlocation l = new Customlocation();
+        l.setId(c.getLong(c.getColumnIndex("id")));
+        l.setRecordedAt(stringToDate(c.getString(c.getColumnIndex("recordedAt"))));
+        l.setLatitude(c.getString(c.getColumnIndex("latitude")));
+        l.setLongitude(c.getString(c.getColumnIndex("longitude")));
+        //l.setAccuracy(c.getString(c.getColumnIndex("accuracy")));
+        //l.setSpeed(c.getString(c.getColumnIndex("speed")));
+        
+        return l;*/
+    }
+    /* Get All location in array list */
+    public ArrayList<Customlocation> getAllLocations(){
+        // Customlocation[] getAllLocations() {
+        ArrayList<Customlocation> all = new ArrayList<Customlocation>();
+
+        String query = "SELECT * from "+DICTIONARY_TABLE_NAME+" order by "+KEY_ID+" DESC ";
+        SQLiteDatabase db = this.getReadableDatabase(); // get for read
+        Cursor c = db.rawQuery(query, null);
+        // create the return object
+        //int nblines = c.getCount();
+        //Customlocation[] all = new Customlocation();
+        
+        if (c .moveToFirst()) {
+            while (c.isAfterLast() == false) {
+                all.add(hydrate(c));
+                c.moveToNext();
+            }
+        }
+        c.close();
+        db.close();
+        return all;
+    }
+
+
+
     public Date stringToDate(String dateTime) {
         SimpleDateFormat iso8601Format = new SimpleDateFormat(DATE_FORMAT);
         Date date = null;

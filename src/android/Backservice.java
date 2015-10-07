@@ -22,6 +22,8 @@ import android.os.SystemClock;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import java.util.ArrayList;
+
 import android.util.Log;
  
 public class Backservice extends Service implements LocationListener {
@@ -240,10 +242,9 @@ public class Backservice extends Service implements LocationListener {
     private Runnable myTask = new Runnable() {
         public void run() {
             // Do something here
-            Log.v(TAG, "Runnable run thread.");
-
+            Log.v(TAG, "Runnable run thread entry.");
             // get the background localisation
-            Log.v(TAG, location.toString());
+            Log.v(TAG, "location : "+location.toString());
 
             // add it to the local litesql database
             Sqlitelocation sqlitelocation = new Sqlitelocation(mContext);
@@ -252,8 +253,22 @@ public class Backservice extends Service implements LocationListener {
             // send to the server the full object
             // si android is online send it to server
             if (isNetworkOnline()){
-                Log.v(TAG, "device is online !!! ");
+                Log.v(TAG, "device is online !!! send to the server the multiple infos ");
                 
+                //Array locations = 
+                //Customlocation[] customLocation = 
+
+                //ArrayList arr = new ArrayList();
+
+                ArrayList arr = sqlitelocation.getAllLocations();
+
+                Log.v(TAG, "get all customlocations.. ");
+                Log.v(TAG, arr.toString());
+
+
+
+
+
 
             } else {
                 Log.v(TAG, "device NOT online !!! ");
