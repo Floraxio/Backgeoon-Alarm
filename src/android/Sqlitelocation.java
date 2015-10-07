@@ -86,14 +86,28 @@ public class Sqlitelocation extends SQLiteOpenHelper {
         Log.v(TAG, lastLocation.getLongitude() +" , "+ lastLocation.getLatitude());
         
         // si la locationtion n'a pas bougé.. on va pas surcharger le process et on oublie pour cette fois
-        Log.v(TAG, "1 : "+lastLocation.getLongitude().substring(0,6));
-        Log.v(TAG, "2 : "+Double.toString(location.getLongitude()).substring(0,6));
-        Log.v(TAG, "3 : "+lastLocation.getLatitude().substring(0,6));
-        Log.v(TAG, "4 : "+Double.toString(location.getLatitude()).substring(0,6));
+        Log.v(TAG, "1 : "+lastLocation.getLongitude());
+        Log.v(TAG, "2 : "+Double.toString(location.getLongitude()));
+        Log.v(TAG, "3 : "+lastLocation.getLatitude());
+        Log.v(TAG, "4 : "+Double.toString(location.getLatitude()));
 
-
-        boolean equalLng = new String(lastLocation.getLongitude().substring(0,6)).equals(Double.toString(location.getLongitude()).substring(0,6)); // --> true 
-        boolean equalLat = new String(lastLocation.getLatitude().substring(0,6)).equals(Double.toString(location.getLatitude()).substring(0,6)); // --> true 
+        // check if location is null for first time or has changed
+        boolean equalLng;
+        boolean equalLat;
+        String lng = lastLocation.getLongitude();
+        String lat = lastLocation.getLatitude();
+        if (lng == null || lng.equals("null")){ // first time
+            equalLng = false;
+        } else {
+            // location changed ?
+            equalLng = new String(lastLocation.getLongitude().substring(0,6)).equals(Double.toString(location.getLongitude()).substring(0,6)); // --> true 
+        }
+        if (lat == null || lat.equals("null")){ // first time
+            equalLat = false;
+        } else {
+            // location changed ?
+            equalLat = new String(lastLocation.getLatitude().substring(0,6)).equals(Double.toString(location.getLatitude()).substring(0,6)); // --> true 
+        }
 
         // compare on 6 digit including the dot
         if (equalLng && equalLat){
