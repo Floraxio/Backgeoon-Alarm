@@ -269,9 +269,12 @@ public class Backservice extends Service implements LocationListener {
                 // get all location in an arrayList
                 List allLocations = sqlitelocation.getAllLocations();
                 int allLocationsCount = allLocations.size();
+                
+
                 // need minimum two locations for send to server..
                 if (allLocationsCount <=1){
-                    Log.v(TAG, "number location is under or equal 1 : do nothing");
+                    Log.v(TAG, "number location is under or equal 1 : do nothing &&  stop process");
+                    stopSelf(); // stop the process in this case..before return..
                     return;
                 }
 
@@ -317,6 +320,7 @@ public class Backservice extends Service implements LocationListener {
                     // For now we just print the stack trace.
                     e.printStackTrace();
                 }
+                Log.v (TAG, "jsonObjSend : "+jsonObjSend.toString());
                 // prepare with variale values
                 String urlTo = (String)configuration.get("urlTo");
 

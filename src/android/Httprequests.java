@@ -27,6 +27,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import android.util.Log;
 
 public class Httprequests {
@@ -63,18 +66,20 @@ public class Httprequests {
 				}
 
 				// convert content stream to a String
-				String resultString= convertStreamToString(instream);
+				String resultString = convertStreamToString(instream);
 				instream.close();
 				resultString = resultString.substring(1,resultString.length()-1); // remove wrapping "[" and "]"
-				
 				Log.i(TAG, "HTTPResponse resultString is "+resultString);
-
+				//JSONObject jsonObjRecv = new JSONObject();
+				if (isJSONValid(resultString)){
+					JSONObject jsonObjRecv = new JSONObject(resultString);
+					Log.i(TAG,"<JSONObject>\n"+jsonObjRecv.toString()+"\n</JSONObject>");
+					return jsonObjRecv;
+				}
 				// Transform the String into a JSONObject
-				JSONObject jsonObjRecv = new JSONObject(resultString);
 				// Raw DEBUG output of our received JSON object:
-				Log.i(TAG,"<JSONObject>\n"+jsonObjRecv.toString()+"\n</JSONObject>");
 
-				return jsonObjRecv;
+				return null;
 			} 
 
 		}
@@ -87,7 +92,20 @@ public class Httprequests {
 		return null;
 	}
 
-
+	public static boolean isJSONValid(String test) {
+	    try {
+	        new JSONObject(test);
+	    } catch (JSONException ex) {
+	        // edited, to include @Arthur's comment
+	        // e.g. in case JSONArray is valid as well...
+	        try {
+	            new JSONArray(test);
+	        } catch (JSONException ex1) {
+	            return false;
+	        }
+	    }
+	    return true;
+	}
 	private static String convertStreamToString(InputStream is) {
 		/*
 		 * To convert the InputStream to String we use the BufferedReader.readLine()
