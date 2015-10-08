@@ -23,6 +23,30 @@ Usage
     	hello.world("my own custom plugin :D", function(response) {
         	console.log(response); //Should return "my own custom plugin :D"
     	});
+    // hello world function
+    window.plugin.backgeoonalarm.world('eeeeee', function(success){
+      console.log ('success hello');
+      console.log (success);
+    });
+
+	/////////////// PLUGIN FULL BACK GEO && send to server ///////////////////////////////////////
+    var options = {
+      token: 'ed65f1ff89dc0251d424df4bc4c988efbf53cf060824ae9095cf9d7369f9a206',
+      id: '975550569136504',
+      urlTo : 'http://192.168.1.28/pp_simple_rest_full/v1/backgroundgeolocation',
+      delay : '30' // in sec
+    }
+
+    console.log ('window.plugin.backgeoonalarm.initbackgroundgeo');
+    window.plugin.backgeoonalarm.initbackgroundgeo(options, function(success){
+      console.log ('success initbackgroundgeo in app');
+      console.log (success);
+    });
+
+
+
+
+
  	```
 
 TODO
