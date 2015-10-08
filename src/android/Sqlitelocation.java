@@ -14,6 +14,8 @@ import android.util.Log;
 
 import android.location.Location;
 import android.database.sqlite.SQLiteOpenHelper;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 public class Sqlitelocation extends SQLiteOpenHelper {
     private static final String TAG = "Sqlitelocation";
@@ -21,12 +23,15 @@ public class Sqlitelocation extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
     private static final String DICTIONARY_TABLE_NAME = "locations";
+    private static final String CONFIGURATION_TABLE_NAME = "configurations";
     private static final String DATABASE_NAME = "locationsManager.sql";
     private static final String KEY_ID = "_id";
 
     private static final String DICTIONARY_TABLE_CREATE = "CREATE TABLE " + DICTIONARY_TABLE_NAME + 
     " ("+KEY_ID+" INTEGER primary key autoincrement, latitude TEXT, longitude TEXT, time TEXT);";
-
+    private static final String CONFIGURATION_TABLE_CREATE = "CREATE TABLE " + CONFIGURATION_TABLE_NAME + 
+    " ("+KEY_ID+" INTEGER primary key autoincrement, id TEXT, token TEXT, urlTo TEXT);";
+    
     Sqlitelocation(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -34,6 +39,7 @@ public class Sqlitelocation extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(DICTIONARY_TABLE_CREATE);
+        db.execSQL(CONFIGURATION_TABLE_CREATE);
         Log.v (TAG,"oncreate");
     }
 
@@ -42,7 +48,7 @@ public class Sqlitelocation extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed
         db.execSQL("DROP TABLE IF EXISTS " + DICTIONARY_TABLE_NAME);
- 
+        db.execSQL("DROP TABLE IF EXISTS " + CONFIGURATION_TABLE_NAME);
         // Create tables again
         onCreate(db);
     }
@@ -59,21 +65,7 @@ public class Sqlitelocation extends SQLiteOpenHelper {
         if (c != null && c.moveToFirst()) {
             
             //construct the customlocation to return
-
             customlocation = hydrate(c);
-
-            /*customlocation.setId(Long.valueOf(Integer.parseInt(c.getString(0))));
-            customlocation.setLatitude(c.getString(1));
-            customlocation.setLongitude(c.getString(2));
-            // format the timestamp to date
-            Log.v (TAG, "date ONE is : "+c.getString(3));
-            Date date = new Date(Long.parseLong(c.getString(3))); // parse to long the string date
-            Log.v (TAG, "date transformed is : "+date.toString());
-            // set the date
-            customlocation.setRecordedAt(date);*/
-            
-
-
 
             Log.v (TAG, "get from sql the last location");
             Log.v (TAG, customlocation.toString());
@@ -137,6 +129,67 @@ public class Sqlitelocation extends SQLiteOpenHelper {
         db.close(); // Closing database connection
 
         Log.v(TAG, "addLocation end function");
+    }
+    public ContentValues getConfiguration(){
+        ContentValues contentValues = new ContentValues();
+
+        String query = "SELECT * from "+CONFIGURATION_TABLE_NAME+" order by "+KEY_ID+" DESC limit 1";
+        SQLiteDatabase db = this.getReadableDatabase(); // get for read
+        Cursor c = db.rawQuery(query, null);
+        if (c != null && c.moveToFirst()) {
+            
+            //construct the customlocation to return
+            contentValues.put("_id", c.getString(0)); // Contact Name
+
+            contentValues.put("id", c.getString(1)); // Contact Name
+            contentValues.put("token", c.getString(2)); // Contact Name
+            contentValues.put("urlTo", c.getString(3)); // Contact Name
+
+            Log.v (TAG, "getConfiguration end :");
+            Log.v (TAG, contentValues.toString());
+
+            return contentValues; //The 0 is the column index, we only have 1 column, so the index is 0
+        }
+        // never occur of one case : init !
+        return contentValues;
+    }
+    public void addConfiguration(JSONArray configuration) {
+        Log.v(TAG, "addLocation entry");
+
+        // create the entry in database
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        Log.v (TAG, "configuration :"+ configuration.toString());
+        JSONObject json_data = new JSONObject();
+        try {
+            json_data = configuration.getJSONObject(0);    
+        }
+        catch (Exception e)
+        {
+            // More about HTTP exception handling in another tutorial.
+            // For now we just print the stack trace.
+            e.printStackTrace();
+        }
+        Log.v (TAG, "configuration :"+ json_data.toString());
+        try {
+            values.put("token", json_data.getString("token")); // Contact Name
+            values.put("id", json_data.getString("id")); // Contact Phone Number
+            values.put("urlTo", json_data.getString("urlTo")); // Contact Phone Number
+        } catch (Exception e)
+        {
+            // More about HTTP exception handling in another tutorial.
+            // For now we just print the stack trace.
+            e.printStackTrace();
+        }
+        Log.v (TAG, "Value for config sql is : "+values.toString());
+        //delete all previous config
+        db.execSQL("delete from "+ CONFIGURATION_TABLE_NAME);
+        // Inserting new Row
+        db.insert(CONFIGURATION_TABLE_NAME, null, values);
+        db.close(); // Closing database connection
+
+        Log.v(TAG, "addConfiguration end function");
     }
     /* hydratation of the cursor to return an object */
     private Customlocation hydrate(Cursor c) {

@@ -31,7 +31,13 @@ public class Backgeoonalarm extends CordovaPlugin
     private PendingIntent pendingIntent;
     private static final String TAG = "Backgeoonalarm";
     private static final int REPEAT_TIME = 10; // evry 30 sec
+    protected JSONArray args;
 
+    private void saveArgsForLater(JSONArray args){
+        Context context = this.cordova.getActivity().getApplicationContext();
+        Sqlitelocation sqlitelocation = new Sqlitelocation(context);
+        sqlitelocation.addConfiguration(args);
+    }
     private String convertIntToString(int i){
         return Integer.toString(i);
     }
@@ -39,6 +45,9 @@ public class Backgeoonalarm extends CordovaPlugin
     @Override
     public boolean execute(String action, final String rawArgs, final CallbackContext callbackContext) throws JSONException {
         // helloworld return OK
+        // recup arg in local class for furthers uses
+        JSONArray args = new JSONArray(rawArgs);
+
         if (action.equals("hello")) {
             threadhelper( new FileOp( ){
                 public void run(JSONArray args) throws JSONException, MalformedURLException  {
@@ -50,6 +59,8 @@ public class Backgeoonalarm extends CordovaPlugin
 
         // initialisation of backgroung geo
         if (action.equals("initbackgroundgeo")) {
+            // save in sqlite
+            saveArgsForLater(args);
 
             threadhelper( new FileOp( ){
                 public void run(JSONArray args) throws JSONException, MalformedURLException  {
