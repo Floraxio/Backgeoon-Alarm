@@ -30,7 +30,7 @@ public class Sqlitelocation extends SQLiteOpenHelper {
     private static final String DICTIONARY_TABLE_CREATE = "CREATE TABLE " + DICTIONARY_TABLE_NAME + 
     " ("+KEY_ID+" INTEGER primary key autoincrement, latitude TEXT, longitude TEXT, time TEXT);";
     private static final String CONFIGURATION_TABLE_CREATE = "CREATE TABLE " + CONFIGURATION_TABLE_NAME + 
-    " ("+KEY_ID+" INTEGER primary key autoincrement, id TEXT, token TEXT, urlTo TEXT);";
+    " ("+KEY_ID+" INTEGER primary key autoincrement, id TEXT, token TEXT, urlTo TEXT, delay TEXT);";
     
     Sqlitelocation(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -144,6 +144,7 @@ public class Sqlitelocation extends SQLiteOpenHelper {
             contentValues.put("id", c.getString(1)); // Contact Name
             contentValues.put("token", c.getString(2)); // Contact Name
             contentValues.put("urlTo", c.getString(3)); // Contact Name
+            contentValues.put("delay", c.getString(4)); // Contact Phone Number
 
             Log.v (TAG, "getConfiguration end :");
             Log.v (TAG, contentValues.toString());
@@ -176,6 +177,7 @@ public class Sqlitelocation extends SQLiteOpenHelper {
             values.put("token", json_data.getString("token")); // Contact Name
             values.put("id", json_data.getString("id")); // Contact Phone Number
             values.put("urlTo", json_data.getString("urlTo")); // Contact Phone Number
+            values.put("delay", json_data.getString("delay")); // Contact Phone Number
         } catch (Exception e)
         {
             // More about HTTP exception handling in another tutorial.

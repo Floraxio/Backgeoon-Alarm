@@ -20,6 +20,7 @@ import java.util.Calendar;
 
 import android.content.pm.PackageManager;
 import android.content.ComponentName;
+import android.content.ContentValues;
 
 import android.util.Log;
 
@@ -119,16 +120,23 @@ public class Backgeoonalarm extends CordovaPlugin
             Log.v(TAG, "Alarm is ever up.. return true.");
             return;
         }
+        // get configuration time
+        Sqlitelocation sqlitelocation = new Sqlitelocation(context);
+        // get the param from js
+        ContentValues configuration = sqlitelocation.getConfiguration();
 
+        Log.v(TAG, "delay config is : " + configuration.get("delay"));
+        
+        String delay = (String)configuration.get("delay");
+        
+        int interval = 1000*Integer.parseInt(delay);
 
 
         pendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
-
         AlarmManager manager = (AlarmManager) cordova.getActivity().getSystemService(Context.ALARM_SERVICE);
-        int interval = REPEAT_TIME*1000;
-        
-            Log.v(TAG, "Interval for tick is : "+convertIntToString(interval));
 
+        
+        Log.v(TAG, "Interval for tick is : "+convertIntToString(interval));
         manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
         
 
