@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import java.util.Map;
+import android.content.ContentValues;
 
 import java.util.List;
 
@@ -251,8 +252,14 @@ public class Backservice extends Service implements LocationListener {
             // get the background localisation
             Log.v(TAG, "location : "+location.toString());
 
-            // add it to the local litesql database
             Sqlitelocation sqlitelocation = new Sqlitelocation(mContext);
+            // get the param from js
+            ContentValues configuration = sqlitelocation.getConfiguration();
+
+            Log.v(TAG, "config in task :"+configuration.toString());
+
+
+            // add it to the local litesql database if diff from previous state
             sqlitelocation.addLocation(location);
             
             // send to the server the full object
@@ -261,6 +268,13 @@ public class Backservice extends Service implements LocationListener {
                 Log.v(TAG, "device is online !!! send to the server the multiple infos ");
                 // get all location in an arrayList
                 List allLocations = sqlitelocation.getAllLocations();
+                int allLocationsCount = allLocations.size();
+                // need minimum two locations for send to server..
+                if (allLocationsCount <=1){
+                    Log.v(TAG, "number location is under or equal 1 : do nothing");
+                    return;
+                }
+
                     Log.v(TAG, "get all customlocations.. ");
                     Log.v(TAG, allLocations.toString());
                 // prepare && send the request to the server
@@ -271,7 +285,7 @@ public class Backservice extends Service implements LocationListener {
                     Log.v(TAG, "inforeach arraylist");
                     Log.v(TAG, "customlocation: "+customlocation.toString());
                     Customlocation custom = (Customlocation)customlocation;
-Log.v(TAG, "custommmm: "+custom.toString());
+                Log.v(TAG, "custommmm: "+custom.toString());
 
                     //format an jsonocject for have datas
                     JSONObject jsonObj = new JSONObject();
@@ -294,8 +308,8 @@ Log.v(TAG, "custommmm: "+custom.toString());
                 JSONObject jsonObjSend = new JSONObject();
                 try {
                     jsonObjSend.put("data", jsonArray);
-                    jsonObjSend.put("token", "xxxxxxxxxxxxxxxxxxxxxxxxx");
-                    jsonObjSend.put("id", "yyyyyyyyyyyy");
+                    jsonObjSend.put("token", configuration.get("token"));
+                    jsonObjSend.put("id", configuration.get("id"));
 
                 } catch (Exception e)
                 {
@@ -304,11 +318,34 @@ Log.v(TAG, "custommmm: "+custom.toString());
                     e.printStackTrace();
                 }
                 // prepare with variale values
-                String urlTo = "http://192.168.1.28/pp_simple_rest_full/v1/backgroundgeolocation";
+                String urlTo = (String)configuration.get("urlTo");
+
                 JSONObject jSONObjectReceive = httprequests.SendHttpPost(urlTo, jsonObjSend);
                 if (jSONObjectReceive != null){
-                    Log.v(TAG, "get return http");
+                    Log.v(TAG, "get return http & jSONObjectReceive is NOT NULL, we interpret that");
                     Log.v(TAG, jSONObjectReceive.toString());
+
+                    String resultRequest = null;
+                    try{
+                        resultRequest = jSONObjectReceive.getString("result");
+                        Log.v(TAG, "resultRequest HTTP : " + resultRequest);
+
+                    } catch (Exception e){
+                        // More about HTTP exception handling in another tutorial.
+                        // For now we just print the stack trace.
+                        e.printStackTrace();
+                    }
+                    boolean testReturnHttp = new String(resultRequest).equals("0"); // --> 0 is true : all is good
+                    if (testReturnHttp){
+                        Log.v(TAG, "Return HTTP all is good can be erase previous datas");
+                        sqlitelocation.eraseAllLocations();
+
+                    } else {
+                        Log.v(TAG, "return http different 0 server respond not good ! ");
+
+                    }
+
+
                 } else {
                     // nothing to do -> server is not properly config for return json
                     Log.v(TAG, "return http is NULL");

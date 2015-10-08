@@ -32,11 +32,11 @@ import android.util.Log;
 public class Httprequests {
 	private static final String TAG = "Httprequests";
 
-	public static JSONObject SendHttpPost(String URL, JSONObject jsonObjSend) {
+	public static JSONObject SendHttpPost(String urlTo, JSONObject jsonObjSend) {
 
 		try {
 			DefaultHttpClient httpclient = new DefaultHttpClient();
-			HttpPost httpPostRequest = new HttpPost(URL);
+			HttpPost httpPostRequest = new HttpPost(urlTo);
 
 			StringEntity se;
 			se = new StringEntity(jsonObjSend.toString());

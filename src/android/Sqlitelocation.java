@@ -226,7 +226,11 @@ public class Sqlitelocation extends SQLiteOpenHelper {
         db.close();
         return all;
     }
-
+    public void eraseAllLocations(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        //delete all previous location
+        db.execSQL("delete from "+ DICTIONARY_TABLE_NAME);
+    }
     public Date stringToDate(String dateTime) {
         SimpleDateFormat iso8601Format = new SimpleDateFormat(DATE_FORMAT);
         Date date = null;
