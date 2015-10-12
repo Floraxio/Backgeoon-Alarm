@@ -22,8 +22,9 @@
     <!-- Android -->
     <platform name="android">
 
-        <dependency id="cordova-plugin-android-support-v4" />
+        <!-- no dependancy's tag - all is in java.. -->
 
+        
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="Backgeoonalarm" >
                 <param name="android-package" value="com.oby.cordova.plugin.Backgeoonalarm"/>
