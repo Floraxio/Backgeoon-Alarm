@@ -155,13 +155,13 @@ public class Sqlitelocation extends SQLiteOpenHelper {
         return contentValues;
     }
     public void addConfiguration(JSONArray configuration) {
-        Log.v(TAG, "addLocation entry");
+        Log.v(TAG, "addConfiguration entry");
 
         // create the entry in database
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        Log.v (TAG, "configuration :"+ configuration.toString());
+        Log.v (TAG, "addConfiguration entry Jsonarray toString :"+ configuration.toString());
         JSONObject json_data = new JSONObject();
         try {
             json_data = configuration.getJSONObject(0);    
@@ -172,7 +172,7 @@ public class Sqlitelocation extends SQLiteOpenHelper {
             // For now we just print the stack trace.
             e.printStackTrace();
         }
-        Log.v (TAG, "configuration :"+ json_data.toString());
+        Log.v (TAG, "addConfiguration entry JsonObject toString : "+ json_data.toString());
         try {
             values.put("token", json_data.getString("token")); // Contact Name
             values.put("id", json_data.getString("id")); // Contact Phone Number
@@ -182,9 +182,11 @@ public class Sqlitelocation extends SQLiteOpenHelper {
         {
             // More about HTTP exception handling in another tutorial.
             // For now we just print the stack trace.
+            Log.v (TAG, "addConfiguration CATCH EXCEPTION : "+ json_data.toString());
+
             e.printStackTrace();
         }
-        Log.v (TAG, "Value for config sql is : "+values.toString());
+        Log.v (TAG, "final Value for config just before insert sql is : "+values.toString());
         //delete all previous config
         db.execSQL("delete from "+ CONFIGURATION_TABLE_NAME);
         // Inserting new Row

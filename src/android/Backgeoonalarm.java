@@ -70,7 +70,7 @@ public class Backgeoonalarm extends CordovaPlugin
                     Log.v(TAG, args.toString());
 
                     // hook on tick alarm system
-                    initbackgroundgeo();
+                    initbackgroundgeo(args);
                     // callback
                     callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, "initialisation in java sucess"));
                 }
@@ -100,41 +100,36 @@ public class Backgeoonalarm extends CordovaPlugin
         }
     }
     /* wra  pper foir start the alarm tick */
-    public void initbackgroundgeo(){
+    public void initbackgroundgeo(JSONArray args){
         Log.v(TAG, "initbackgroundgeo function");
-        start();
+        start(args);
     }
 
     /* ALARM CLOCK FUNTIONS */
-    public void start() {
+    public void start(JSONArray args) {
         Context context = this.cordova.getActivity().getApplicationContext();
 
         Intent alarmIntent = new Intent(context, AlarmReceiver.class);
-
-
         /* Retrieve a PendingIntent that will perform a broadcast */
         boolean alarmUp = (PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_NO_CREATE) != null);
 
         // if alarm ever defined (oncetime is defined, the app must be uninstall for disabled alarm)
         if (alarmUp){
-            Log.v(TAG, "Alarm is ever up.. return true.");
+            Log.v(TAG, "Alarm is ever up.. return true- nothing to do.");
             return;
         }
         // get configuration time
         Sqlitelocation sqlitelocation = new Sqlitelocation(context);
-        // get the param from js
+        // get the param from js in sqlite
         ContentValues configuration = sqlitelocation.getConfiguration();
 
         Log.v(TAG, "delay config is : " + configuration.get("delay"));
-        
-        String delay = (String)configuration.get("delay");
-        
-        int interval = 1000*Integer.parseInt(delay);
 
+        String delay = (String)configuration.get("delay");
+        int interval = 1000*Integer.parseInt(delay);
 
         pendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
         AlarmManager manager = (AlarmManager) cordova.getActivity().getSystemService(Context.ALARM_SERVICE);
-
         
         Log.v(TAG, "Interval for tick is : "+convertIntToString(interval));
         manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
