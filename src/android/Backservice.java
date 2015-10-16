@@ -173,7 +173,7 @@ public class Backservice extends Service implements LocationListener {
         this.isRunning = false;
         // Cancel the persistent notification.
         mNM.cancel(NOTIFICATION);
-        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "Service Destroyed", Toast.LENGTH_LONG).show();
 
     }
     @Override
@@ -188,7 +188,7 @@ public class Backservice extends Service implements LocationListener {
         // get location on create for have the context inside (and send http request in the thread)
         getLocation();
 
-        Toast.makeText(this, "The new Service was Created", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "The new Service was Created", Toast.LENGTH_LONG).show();
 
     }
     /**
@@ -240,7 +240,7 @@ public class Backservice extends Service implements LocationListener {
             Log.v(TAG, "ever - isRunning.");
         }
 
-        Toast.makeText(this, " handleStart", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, " handleStart", Toast.LENGTH_SHORT).show();
 
         return START_STICKY;
     }
